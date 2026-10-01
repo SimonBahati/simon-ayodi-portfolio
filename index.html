@@ -454,9 +454,51 @@
            Click a case to expand it.
         </div>
 
-        <details class="case">
+         <details class="case" open>
           <summary>
             <span class="id mono">CASE-001</span>
+            <span class="title">TryHackMe Lab - Data Exfiltration Through DNS Tunneling</span>
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+              <p>
+                DNS Exfiltration takes advantage of the Domain Name System Protocol because it's packets or traffic
+                is normally allowed in computer networks. Attackers use it to smuggle data through encoding of bytes
+                in DNS queries/responses, which makes it hard for firewalls and web proxies to discover.
+              </p>
+            
+              <dt>Tools</dt>
+              <dd>Wireshark, Splunk</dd>
+              <dt>Steps</dt>
+              <!--<dd class="placeholder">[Describe how you generated the activity and where you looked for it — e.g. Event ID 4625, source IP, time window]</dd>-->
+                <ol>
+                  <li>Open the captured network traffic pcap file in Wireshark.</li>
+                  <li>Filter for dns.</li>
+                  <li>Filter for dns with no response: "dns.response.code == 0" to check whether there are any queries with large query length.</li>
+                  <li>Narrow down the search by filtering further for long suspicious subdomain lengths: "dns && frame.len > 70"</li>
+                  <li>Filter on the suspicious domain receiving the dns requests: "dns && dns.qry.name contains"suspiciousdomain"</li>
+                  <li>Do a correlation in splunk: "index=data_exfil sourcetype=DNS_logs"</dd>
+                  <li>Display the statistics of dns queries generated per user using: index="data_exfil" sourcetype="DNS_logs" | stats count by src_ip</dd>
+                  <li>Apply another filter to identify the suspicious ones: index="data_exfil" sourcetype="dns_logs" | stats count by query | sort -count</dd>
+                </ol>
+              <dt>Findings</dt>
+                <ol>
+                  <li>Large number of dns requests without repsonses.</li>
+                  <li>Large length of dns query.</li>
+                </ol>
+              
+              <!-- <dd class="placeholder">[State what you found: number of attempts, timing pattern, account targeted]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Block the suspected domain and Ip through the firewall</dd>
+              <!-- <dd class="placeholder">[What you'd do next — e.g. account lockout policy, alert threshold, block source IP]</dd> -->
+            </dl>
+          </div>
+        </details>
+
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-002</span>
             <span class="title">Phishing email triage — Header and Attachment analysis</span>
             <!-- <span class="tag tag--priority">write-up in progress</span> -->
             <span class="tag tag--verified">verified</span>
@@ -497,47 +539,7 @@
             </dl>
           </div>
         </details>
-        <details class="case" open>
-          <summary>
-            <span class="id mono">CASE-002</span>
-            <span class="title">TryHackMe Lab - Data Exfiltration Through DNS Tunneling</span>
-            <span class="tag tag--verified">verified</span>
-            <span class="chev">▸</span>
-          </summary>
-          <div class="case-body">
-              <p>
-                DNS Exfiltration takes advantage of the Domain Name System Protocol because it's packets or traffic
-                is normally allowed in computer networks. Attackers use it to smuggle data through encoding of bytes
-                in DNS queries/responses, which makes it hard for firewalls and web proxies to discover.
-              </p>
-            
-              <dt>Tools</dt>
-              <dd>Wireshark, Splunk</dd>
-              <dt>Steps</dt>
-              <!--<dd class="placeholder">[Describe how you generated the activity and where you looked for it — e.g. Event ID 4625, source IP, time window]</dd>-->
-                <ol>
-                  <li>Open the captured network traffic pcap file in Wireshark.</li>
-                  <li>Filter for dns.</li>
-                  <li>Filter for dns with no response: "dns.response.code == 0" to check whether there are any queries with large query length.</li>
-                  <li>Narrow down the search by filtering further for long suspicious subdomain lengths: "dns && frame.len > 70"</li>
-                  <li>Filter on the suspicious domain receiving the dns requests: "dns && dns.qry.name contains"suspiciousdomain"</li>
-                  <li>Do a correlation in splunk: "index=data_exfil sourcetype=DNS_logs"</dd>
-                  <li>Display the statistics of dns queries generated per user using: index="data_exfil" sourcetype="DNS_logs" | stats count by src_ip</dd>
-                  <li>Apply another filter to identify the suspicious ones: index="data_exfil" sourcetype="dns_logs" | stats count by query | sort -count</dd>
-                </ol>
-              <dt>Findings</dt>
-                <ol>
-                  <li>Large number of dns requests without repsonses.</li>
-                  <li>Large length of dns query.</li>
-                </ol>
-              
-              <!-- <dd class="placeholder">[State what you found: number of attempts, timing pattern, account targeted]</dd> -->
-              <dt>Recommendation</dt>
-              <dd>Block the suspected domain and Ip through the firewall</dd>
-              <!-- <dd class="placeholder">[What you'd do next — e.g. account lockout policy, alert threshold, block source IP]</dd> -->
-            </dl>
-          </div>
-        </details>
+       
         <details class="case">
           <summary>
             <span class="id mono">CASE-003</span>
@@ -637,23 +639,23 @@
                 <ol>
                   <li>Open the captured pcap file in Wireshark and filter for icmp traffic: icmp</li>
                   <li>Look for unusually frequent and/or large icmp echo requests/replies.</li>
-                  <li>Investigate the average size of data sent to various domains: index="data_exfil" sourcetype="http_logs" method=POST | stats count avg(bytes_sent) max(bytes_sent) min(bytes_sent) by domain | sort - count</li>
-                  <li>Filter for requests with large payload sizes: index="data_exfil" sourcetype="http_logs" method=POST bytes_sent > 600 | table _time src_ip uri domain dst_ip bytes_sent | sort - bytes_sent</li>
-                  <li>Depending on the findings, correlate with the pcap to further investigate.</li>
-                  <li>In Wireshark, filter for http traffic: http</li>
-                  <li>Filter for POST requests: http.request.method == "POST"</li>
-                  <li>Look for traffic with frame length exceeding 500: http.request.method == "POST" and frame.len > 500</li>
-                  <li>Increase the frame length size to 750 to further reduce the noise.</li>
-                  <li>The previous step reveals only one suspicious request entry.</li>
+                  <li>Isolate echo request packets: icmp.type == 8</li>
+                  <li>Apply another filter on the isolated packets and focus on frame length > 100: icmp.type == 8 and frame.len > 100: 
+                    Any packet with over 100 bytes is suspicious. Normal pings range ~74 bytes total.</li>
+                  <li>Right-click on a suspicious packet and select "Follow" > "ICMP Stream" to view the communication.</li>                  
                  </ol>              
               <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
               <dt>Findings</dt>
                 <ol>
-                  <li>Sensitive data was found being transferred via http through .txt and tar.gz files.</li>
+                  <li>Sensitive data was found being transferred via ICMP in .txt files.</li>
                 </ol>              
               <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
               <dt>Recommendation</dt>
               <dd>Isolate the identified internal host ip addresses and block the identified malicious ip addresses.</dd>
+              <dd>Restrict outbound ICMP traffic from the identified internal hosts.</dd>
+              <dd>Use IDS/IPS rules to flag abnormal payload sizes or content in ICMP pakcets.</dd>
+              <dd>Limit ICMP packet size and rate to reduce the risk of data exfiltration.</dd>
+              <dd>Create a baseline for normal ICMP traffic patterns so that anomalies can be detected.</dd>
               <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
             </dl>
           </div>
