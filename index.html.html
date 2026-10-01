@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simon Ayodi — SOC Analyst L1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D1214;
+    --panel: #121A1D;
+    --panel-2: #0F1619;
+    --border: #223035;
+    --border-soft: #182226;
+    --text: #E6ECEE;
+    --text-dim: #8A9AA1;
+    --text-faint: #56656B;
+    --amber: #E8A33D;
+    --teal: #4FB8AC;
+    --red: #D9634C;
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--amber); color: #14100A; }
+
+  a { color: var(--teal); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover, a:focus-visible { border-bottom-color: currentColor; }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--teal); outline-offset: 3px;
+  }
+
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  p { margin: 0 0 1em; color: var(--text-dim); max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  .mono { font-family: var(--mono); }
+
+  /* ---------- layout shell ---------- */
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 56px;
+  }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
+  }
+
+  /* ---------- header / hero ---------- */
+  .hero {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 24px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-tag {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--teal);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .hero-tag .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal);
+    animation: blink 2.2s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) { .hero-tag .dot { animation: none; } }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+  .hero h1 {
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.15;
+    max-width: 16ch;
+  }
+  .hero .role {
+    font-family: var(--mono);
+    color: var(--teal);
+    font-size: clamp(15px, 2vw, 17px);
+    margin-top: 10px;
+    display: block;
+  }
+  .hero .lede {
+    margin-top: 20px;
+    font-size: 17px;
+    max-width: 62ch;
+  }
+  .contact-row {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    font-family: var(--mono);
+    font-size: 13.5px;
+  }
+  .contact-row a {
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 7px 12px;
+    border-radius: 3px;
+    background: var(--panel);
+  }
+  .contact-row a:hover { border-color: var(--teal); color: var(--teal); }
+  .contact-row a:focus-visible { border-bottom: none; }
+
+  /* ---------- sidebar nav ---------- */
+  .side-nav {
+    position: sticky;
+    top: 32px;
+    align-self: start;
+    padding-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .side-nav a {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    padding: 7px 0;
+    border-bottom: none;
+    border-left: 2px solid transparent;
+    padding-left: 12px;
+    margin-left: -13px;
+  }
+  .side-nav a:hover, .side-nav a:focus-visible { color: var(--text); border-left-color: var(--border); outline: none; }
+  .side-nav .index { color: var(--text-faint); margin-right: 8px; }
+
+  @media (max-width: 860px) {
+    .side-nav {
+      position: static;
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 4px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+    .side-nav a { flex: 0 0 auto; border-left: none; padding-left: 0; margin-left: 0; border-bottom: 2px solid transparent; }
+    .side-nav a:hover { border-left: none; border-bottom-color: var(--border); }
+  }
+
+  /* ---------- main content ---------- */
+  main { padding: 48px 0 80px; min-width: 0; }
+  section { margin-bottom: 72px; scroll-margin-top: 24px; }
+  section:last-child { margin-bottom: 0; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head h2 { font-size: 20px; }
+  .section-head .count {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+
+  /* ---------- skills / indicators ---------- */
+  .skill-groups {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 40px;
+  }
+  @media (max-width: 600px) { .skill-groups { grid-template-columns: 1fr; } }
+  .skill-group h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 3px;
+    background: var(--panel-2);
+  }
+
+  /* ---------- case history (details/summary) ---------- */
+  .case {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--panel);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .case summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .case summary::-webkit-details-marker { display: none; }
+  .case summary .id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    flex: 0 0 auto;
+  }
+  .case summary .title {
+    font-weight: 500;
+    flex: 1 1 240px;
+  }
+  .case summary .tag {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    flex: 0 0 auto;
+  }
+  .tag--verified { color: var(--green); border: 1px solid rgba(48, 187, 30, 0.4); background: rgba(23, 177, 23, 0.08); }
+  .tag--priority { color: var(--amber); border: 1px solid rgba(232,163,61,0.4); background: rgba(232,163,61,0.08); }
+  .case summary .chev {
+    font-family: var(--mono);
+    color: var(--text-faint);
+    transition: transform 0.15s ease;
+    flex: 0 0 auto;
+  }
+  .case[open] summary .chev { transform: rotate(90deg); }
+  .case-body {
+    padding: 4px 18px 22px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .case-body dl {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px 16px;
+    margin: 18px 0 0;
+  }
+  @media (max-width: 600px) { .case-body dl { grid-template-columns: 1fr; } }
+  .case-body dt {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    padding-top: 2px;
+  }
+  .case-body dd, ol, li { margin: 0; color: var(--text-dim); }
+  .case-body .placeholder { color: var(--amber); font-style: italic; }
+
+  /* ---------- training log ---------- */
+  .train-item { margin-bottom: 22px; }
+  .train-item:last-child { margin-bottom: 0; }
+  .train-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .train-head .name { font-weight: 500; }
+  .train-head .pct { font-family: var(--mono); font-size: 12.5px; color: var(--text-dim); }
+  .bar {
+    height: 6px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar > span { display: block; height: 100%; background: var(--teal); }
+  .train-note { font-size: 13.5px; margin-top: 6px; color: var(--text-faint); }
+
+  /* ---------- detection artifact ---------- */
+  .artifact {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--panel-2);
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .artifact:last-child { margin-bottom: 0; }
+  .artifact-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .artifact pre {
+    margin: 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+    color: #C9E8E3;
+  }
+  .artifact-note { padding: 14px 18px 18px; border-top: 1px solid var(--border-soft); }
+  .artifact-note p { font-size: 14.5px; }
+
+  /* ---------- footer ---------- */
+  footer {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+
+  .note-banner {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--green);
+    background: rgba(11, 104, 11, 0.07);
+    border: 1px solid rgba(67, 232, 61, 0.3);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+  <header class="hero">
+    <span class="hero-tag"><span class="dot"></span>STATUS: Information Security Engineer Intern at Kenya Revenue Authority(KRA)</span>
+    <h1>Simon Ayodi</h1>
+    <span class="role">SOC Analyst L1 candidate — Security Operations &amp; Incident Triage</span>
+    <p class="lede">
+      Training toward Tier 1 SOC work through TryHackMe's SAL1 pathway and self-directed lab
+      investigations. This page documents what I've built, broken, and analyzed along the way —
+      the same triage-and-document workflow I'd bring to a live working environment.
+    </p>
+    <div class="contact-row">
+      <a href="mailto:simonayodi@gmail.com">simonayodi@gmail.com</a>
+      <a href="https://www.linkedin.com/in/simon-ayodi" target="_blank">linkedin.com/in/simon-ayodi</a>
+      <a href="https://github.com/SimonBahati" target="_blank">github.com/SimonBahati</a>
+      <a href="https://tryhackme.com/p/stuxter" target="_blank">tryhackme.com/p/stuxter</a>
+      <a href="#">Resume (PDF)</a>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="side-nav" aria-label="Section navigation">
+      <a href="#summary"><span class="index">01</span>Summary</a>
+      <a href="#indicators"><span class="index">02</span>Indicators</a>
+      <a href="#cases"><span class="index">03</span>Case history</a>
+      <a href="#training"><span class="index">04</span>Training log</a>
+      <a href="#artifacts"><span class="index">05</span>Detection artifacts</a>
+      <a href="#contact"><span class="index">06</span>Contact</a>
+    </nav>
+
+    <main>
+
+      <section id="summary">
+        <div class="section-head"><h2>Summary</h2></div>
+        <p>
+          I'm building toward an entry-level SOC analyst role, currently working through TryHackMe's
+          Security Analyst Level 1 (SAL1) path alongside a home lab where I run and document my own
+          investigations — log triage, phishing analysis, and traffic inspection. I like the parts of
+          this work that reward patience: reading a log line twice, checking an indicator against
+          more than one source, and writing findings someone else could act on without asking follow-up
+          questions.
+        </p>
+      </section>
+
+      <section id="indicators">
+        <div class="section-head">
+          <h2>Indicators</h2>
+          <span class="count">skills &amp; tools</span>
+        </div>
+        <div class="skill-groups">
+          <div class="skill-group">
+            <h3>SIEM &amp; tooling</h3>
+            <div class="chip-row">
+              <span class="chip">Splunk</span>
+              <span class="chip">Elastic / ELK</span>
+              <span class="chip">Security Onion</span>
+              <span class="chip">Wireshark</span>
+              <span class="chip">Sysmon</span>
+              <span class="chip">Zeek</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <h3>Frameworks &amp; references</h3>
+            <div class="chip-row">
+              <span class="chip">MITRE ATT&amp;CK</span>
+              <span class="chip">Cyber Kill Chain</span>
+              <span class="chip">NIST 800-61</span>
+              <span class="chip">Sigma rules</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <h3>Core concepts</h3>
+            <div class="chip-row">
+              <span class="chip">Log analysis</span>
+              <span class="chip">Alert triage</span>
+              <span class="chip">Phishing analysis</span>
+              <span class="chip">Threat intel lookups</span>
+              <span class="chip">Incident documentation</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <h3>Systems &amp; networking</h3>
+            <div class="chip-row">
+              <span class="chip">Windows admin</span>
+              <span class="chip">Linux (CLI)</span>
+              <span class="chip">TCP/IP</span>
+              <span class="chip">DNS</span>
+              <span class="chip">Active Directory basics</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="cases">
+        <div class="section-head">
+          <h2>Case history</h2>
+          <span class="count">lab write-ups</span>
+        </div>
+        <div class="note-banner">
+           Click a case to expand it.
+        </div>
+
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-001</span>
+            <span class="title">Phishing email triage — Header and Attachment analysis</span>
+            <!-- <span class="tag tag--priority">write-up in progress</span> -->
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <p>
+              Analyzed a TryHackMe phishing email sample: reviewed the full header chain,
+              checked the sender domain's authentication (SPF/DKIM/DMARC), and analyzed the
+              attached file.
+            </p>
+            <dl>
+              <dt>Tools</dt>
+              <dd>Email header analyzer, VirusTotal, urlscan.io</dd>
+              <dt>Steps</dt>
+                <ol>
+                  <li>Investigated the email headers and analyzed the embedded URL.</li>
+                  <li>Identified the recipient and any suspicious elements.</li>
+                  <li>Analyzed the message source to identify the sender's ip.</li>
+                  <li>Investigated the identified ip to determine its owner.</li>
+                  <li>Ran an SPF check on the return-path domain identified in the headers.</li>
+                  <li>Ran a DMARC lookup for the return-path domain found in the headers to identify the complete DMARC record.</li>
+                  <li>Noted the file name of the attached file.</li>
+                  <li>Downloaded the attached file and generated a hash.</li>
+                  <li>Ran the hash through VirusTotal to check for any malicious verdicts.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
+              <dt>Findings</dt>
+                <ol>
+                  <li>The sender domain failed SPF and DKIM authentication checks.</li>
+                  <li>The attached file was identified as malicious by VirusTotal.</li>
+                  <li>The threat categories identified by VirusTotal were: Trojan, and Ransomware.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Block the sender domain and quarantine the email.</dd>
+              <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
+            </dl>
+          </div>
+        </details>
+        <details class="case" open>
+          <summary>
+            <span class="id mono">CASE-002</span>
+            <span class="title">TryHackMe Lab - Data Exfiltration Through DNS Tunneling</span>
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+              <p>
+                DNS Exfiltration takes advantage of the Domain Name System Protocol because it's packets or traffic
+                is normally allowed in computer networks. Attackers use it to smuggle data through encoding of bytes
+                in DNS queries/responses, which makes it hard for firewalls and web proxies to discover.
+              </p>
+            
+              <dt>Tools</dt>
+              <dd>Wireshark, Splunk</dd>
+              <dt>Steps</dt>
+              <!--<dd class="placeholder">[Describe how you generated the activity and where you looked for it — e.g. Event ID 4625, source IP, time window]</dd>-->
+                <ol>
+                  <li>Open the captured network traffic pcap file in Wireshark.</li>
+                  <li>Filter for dns.</li>
+                  <li>Filter for dns with no response: "dns.response.code == 0" to check whether there are any queries with large query length.</li>
+                  <li>Narrow down the search by filtering further for long suspicious subdomain lengths: "dns && frame.len > 70"</li>
+                  <li>Filter on the suspicious domain receiving the dns requests: "dns && dns.qry.name contains"suspiciousdomain"</li>
+                  <li>Do a correlation in splunk: "index=data_exfil sourcetype=DNS_logs"</dd>
+                  <li>Display the statistics of dns queries generated per user using: index="data_exfil" sourcetype="DNS_logs" | stats count by src_ip</dd>
+                  <li>Apply another filter to identify the suspicious ones: index="data_exfil" sourcetype="dns_logs" | stats count by query | sort -count</dd>
+                </ol>
+              <dt>Findings</dt>
+                <ol>
+                  <li>Large number of dns requests without repsonses.</li>
+                  <li>Large length of dns query.</li>
+                </ol>
+              
+              <!-- <dd class="placeholder">[State what you found: number of attempts, timing pattern, account targeted]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Block the suspected domain and Ip through the firewall</dd>
+              <!-- <dd class="placeholder">[What you'd do next — e.g. account lockout policy, alert threshold, block source IP]</dd> -->
+            </dl>
+          </div>
+        </details>
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-003</span>
+            <span class="title">TryHackMe Lab - Data Exfiltration Through FTP.</span>
+            <!-- <span class="tag tag--priority">write-up in progress</span> -->
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <p>
+              Attackers use FTP to move large amounts of data off a network, sometimes via compromised credentials, misconfigured servers, or temporary accounts. 
+              Detection relies on a mix of packet inspection (FTP only), server logs, SSH session metadata, and network flow/size/pattern analysis.
+            </p>
+            <dl>
+              <dt>Tools</dt>
+              <dd>Wireshark</dd>
+              <dt>Steps</dt>
+                <ol>
+                  <li>Look for FTP sessions using Wireshark filters: "ftp || ftp-data" to isolate ftp control traffic.</li>
+                  <li>Filter to show only login attempts with USER/PASS: ftp.request.command == "USER" || ftp.request.command == "PASS" and look for suspicious usernames or weak passwords.</li>
+                  <li>Look for anomalies in filenames or credentials: ftp contains "STOR".</li>
+                  <li>Right-click on a packet and select "Follow" > "TCP Stream" to view the FTP communication.</li>
+                  <li>Look for suspicious files by filtering using file extensions: ftp contains "csv"</li>
+                  <li>Look for traffic with large lengths using: ftp && frame.len > 90 and check the tcp stream.</li>
+                 </ol>              
+              <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
+              <dt>Findings</dt>
+                <ol>
+                  <li>Sensitive data was found being transferred via FTP in different file formats.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Block the identified malicious ip addresses.</dd>
+              <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
+            </dl>
+          </div>
+        </details>
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-004</span>
+            <span class="title">TryHackMe Lab - Data Exfiltration Through HTTP.</span>
+            <!-- <span class="tag tag--priority">write-up in progress</span> -->
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <p>
+              Data exfiltration via HTTP is when an attacker moves sensitive data out of a target network using HTTP as the transport. 
+              HTTP is commonly abused because it blends with normal web traffic, can traverse firewalls and proxies, and can be obfuscated through encoding, encryption and tunneling.
+            </p>
+            <dl>
+              <dt>Tools</dt>
+              <dd>Wireshark, Splunk</dd>
+              <dt>Steps</dt>
+                <ol>
+                  <li>Search for the http logs in Splunk using: index="data_exfil" sourcetype="http_logs".</li>
+                  <li>Narrow down the results to focus on POST requests: index="data_exfil" sourcetype="http_logs" method=POST.</li>
+                  <li>Investigate the average size of data sent to various domains: index="data_exfil" sourcetype="http_logs" method=POST | stats count avg(bytes_sent) max(bytes_sent) min(bytes_sent) by domain | sort - count</li>
+                  <li>Filter for requests with large payload sizes: index="data_exfil" sourcetype="http_logs" method=POST bytes_sent > 600 | table _time src_ip uri domain dst_ip bytes_sent | sort - bytes_sent</li>
+                  <li>Depending on the findings, correlate with the pcap to further investigate.</li>
+                  <li>In Wireshark, filter for http traffic: http</li>
+                  <li>Filter for POST requests: http.request.method == "POST"</li>
+                  <li>Look for traffic with frame length exceeding 500: http.request.method == "POST" and frame.len > 500</li>
+                  <li>Increase the frame length size to 750 to further reduce the noise.</li>
+                  <li>The previous step reveals only one suspicious request entry.</li>
+                 </ol>              
+              <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
+              <dt>Findings</dt>
+                <ol>
+                  <li>Sensitive data was found being transferred via http through .txt and tar.gz files.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Isolate the identified internal host ip addresses and block the identified malicious ip addresses.</dd>
+              <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
+            </dl>
+          </div>
+        </details>
+         <details class="case">
+          <summary>
+            <span class="id mono">CASE-005</span>
+            <span class="title">TryHackMe Lab - Data Exfiltration Through ICMP.</span>
+            <!-- <span class="tag tag--priority">write-up in progress</span> -->
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <p>
+              The Internet Control Message Protocol (ICMP) operates at the network layer and is used for diagnostic and control functions, including ping and TTL-exceeded notifications. 
+              Because it is frequently allowed through firewalls and subjected to less scrutiny than TCP or UDP traffic, ICMP is a known vector for data exfiltration and tunneling. 
+              Threat actors embed data within ICMP packet payloads and transmit it to an attacker-controlled listener.
+            </p>
+            <dl>
+              <dt>Tools</dt>
+              <dd>Wireshark</dd>
+              <dt>Steps</dt>
+                <ol>
+                  <li>Open the captured pcap file in Wireshark and filter for icmp traffic: icmp</li>
+                  <li>Look for unusually frequent and/or large icmp echo requests/replies.</li>
+                  <li>Investigate the average size of data sent to various domains: index="data_exfil" sourcetype="http_logs" method=POST | stats count avg(bytes_sent) max(bytes_sent) min(bytes_sent) by domain | sort - count</li>
+                  <li>Filter for requests with large payload sizes: index="data_exfil" sourcetype="http_logs" method=POST bytes_sent > 600 | table _time src_ip uri domain dst_ip bytes_sent | sort - bytes_sent</li>
+                  <li>Depending on the findings, correlate with the pcap to further investigate.</li>
+                  <li>In Wireshark, filter for http traffic: http</li>
+                  <li>Filter for POST requests: http.request.method == "POST"</li>
+                  <li>Look for traffic with frame length exceeding 500: http.request.method == "POST" and frame.len > 500</li>
+                  <li>Increase the frame length size to 750 to further reduce the noise.</li>
+                  <li>The previous step reveals only one suspicious request entry.</li>
+                 </ol>              
+              <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
+              <dt>Findings</dt>
+                <ol>
+                  <li>Sensitive data was found being transferred via http through .txt and tar.gz files.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
+              <dt>Recommendation</dt>
+              <dd>Isolate the identified internal host ip addresses and block the identified malicious ip addresses.</dd>
+              <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
+            </dl>
+          </div>
+        </details>
+        
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-006</span>
+            <span class="title">PCAP review — identifying beaconing traffic</span>
+            <span class="tag tag--priority">write-up in progress</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <!-- <p>
+              Worked through a public malware-traffic sample in Wireshark, looking for the regular,
+              low-and-slow request pattern typical of command-and-control beaconing.
+            </p> -->
+            <dl>
+              <dt>Tools</dt>
+              <!-- <dd>Wireshark, Zeek, VirusTotal</dd> -->
+              <dt>Steps</dt>
+              <!-- <dd class="placeholder">[Filters used, what drew your attention to the flow]</dd> -->
+              <dt>Findings</dt>
+              <!-- <dd class="placeholder">[Beacon interval, destination reputation, payload notes]</dd> -->
+              <dt>Recommendation</dt>
+              <!-- <dd class="placeholder">[Containment step, IOC to add to watchlist]</dd> -->
+            </dl>
+          </div>
+        </details>
+        <details class="case" open>
+          <summary>
+            <span class="id mono">CASE-007</span>
+            <span class="title">TryHackMe lab — detecting simulated brute-force logins</span>
+            <span class="tag tag--priority">write-up in progress</span>
+            <!-- <span class="tag tag--verified">verified</span> -->
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <!-- <p>
+              Built a small lab (Security Onion sensor + a Windows 10 VM with Sysmon) and ran a
+              scripted series of failed RDP logins against the VM to see what a brute-force attempt
+              looks like end to end — from raw event log to a written finding.
+            </p> -->
+            <dl>
+              <dt>Tools</dt>
+              <!-- <dd>Security Onion, Kibana, Sysmon, Windows Event Viewer</dd> -->
+              <dt>Steps</dt>
+              <!-- <dd class="placeholder">[Describe how you generated the activity and where you looked for it — e.g. Event ID 4625, source IP, time window]</dd> -->
+              <dt>Findings</dt>
+              <!-- <dd class="placeholder">[State what you found: number of attempts, timing pattern, account targeted]</dd> -->
+              <dt>Recommendation</dt>
+              <!-- <dd class="placeholder">[What you'd do next — e.g. account lockout policy, alert threshold, block source IP]</dd> -->
+            </dl>
+          </div>
+        </details>
+                           
+      </section>
+
+      <section id="training">
+        <div class="section-head">
+          <h2>Training log</h2>
+          <span class="count">TryHackMe &amp; certifications</span>
+        </div>
+
+        <div class="train-item">
+          <div class="train-head">
+            <span class="name">SAL1 — Security Analyst Level 1</span>
+            <span class="pct mono">in progress</span>
+          </div>
+          <div class="bar"><span style="width:47%"></span></div>
+          <!-- <p class="train-note">Update this percentage as you move through the path.</p> -->
+        </div>
+
+        <div class="train-item">
+          <div class="train-head">
+            <span class="name">Pre Security path</span>
+            <span class="pct mono">complete</span>
+          </div>
+          <div class="bar"><span style="width:100%"></span></div>
+        </div>
+
+        <div class="train-item">
+          <div class="train-head">
+            <span class="name">CompTIA Security+</span>
+            <span class="pct mono">planned</span>
+          </div>
+          <div class="bar"><span style="width:0%"></span></div>
+          <!-- <p class="train-note">List certifications you're studying for or have scheduled — hiring managers read this as intent, not just progress.</p> -->
+        </div>
+      </section>
+
+      <section id="artifacts">
+        <div class="section-head">
+          <h2>Detection artifacts</h2>
+          <span class="count">rules &amp; queries</span>
+        </div>
+
+        <div class="artifact">
+          <div class="artifact-head"><span>sigma — excessive_failed_logins.yml</span></div>
+          <pre>title: Excessive Failed Logins From Single Source
+status: experimental
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+  timeframe: 5m
+  condition: selection | count() by IpAddress > 10
+level: medium</pre>
+          <div class="artifact-note">
+            <p>
+              Flags more than 10 failed logon events (Event ID 4625) from one source IP within a
+              five-minute window. Written after CASE-001, and tuned against a normal-use baseline
+              from my own lab to reduce noise from mistyped passwords.
+            </p>
+          </div>
+        </div>
+
+        <div class="artifact">
+          <div class="artifact-head"><span>splunk — spl query</span></div>
+          <pre>index=windows EventCode=4625
+| stats count by src_ip, dest_user
+| where count > 10
+| sort - count</pre>
+          <div class="artifact-note">
+            <p>Same logic as a Splunk search, for environments running Splunk instead of an ELK stack.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer id="contact">
+    <span>Simon Ayodi — simonayodi@gmail.com — last updated September 2026</span>
+    <span>Built while training for SOC Analyst L1</span>
+  </footer>
+
+</body>
+</html>
