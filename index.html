@@ -651,11 +651,13 @@
                 </ol>              
               <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
               <dt>Recommendation</dt>
-              <dd>Isolate the identified internal host ip addresses and block the identified malicious ip addresses.</dd>
-              <dd>Restrict outbound ICMP traffic from the identified internal hosts.</dd>
-              <dd>Use IDS/IPS rules to flag abnormal payload sizes or content in ICMP pakcets.</dd>
-              <dd>Limit ICMP packet size and rate to reduce the risk of data exfiltration.</dd>
-              <dd>Create a baseline for normal ICMP traffic patterns so that anomalies can be detected.</dd>
+                <ol>
+                  <li>Isolate the identified internal host ip addresses and block the identified malicious ip addresses.</li>
+                  <li>Restrict outbound ICMP traffic from the identified internal hosts.</li>
+                  <li>Use IDS/IPS rules to flag abnormal payload sizes or content in ICMP packets.</li>
+                  <li>Limit ICMP packet size and rate to reduce the risk of data exfiltration.</li>
+                  <li>Create a baseline for normal ICMP traffic patterns so that anomalies can be detected.</li>
+                </ol>
               <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
             </dl>
           </div>
