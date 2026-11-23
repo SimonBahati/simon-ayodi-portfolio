@@ -662,10 +662,53 @@
             </dl>
           </div>
         </details>
-        
         <details class="case">
           <summary>
             <span class="id mono">CASE-006</span>
+            <span class="title">TryHackMe Lab - Detecting ARP(Address Resolution Protocol) Spoofing.</span>
+            <!-- <span class="tag tag--priority">write-up in progress</span> -->
+            <span class="tag tag--verified">verified</span>
+            <span class="chev">▸</span>
+          </summary>
+          <div class="case-body">
+            <p>
+              ARP spoofing is a type of cyber attack where an attacker maliciously interferes with the communication between two devices on a local network by sending falsified ARP messages. 
+              This allows the attacker to intercept, modify, or redirect traffic between the devices.
+            </p>
+            <dl>
+              <dt>Tools</dt>
+              <dd>Wireshark</dd>
+              <dt>Steps</dt>
+                <ol>
+                  <li>Open the captured pcap file in Wireshark and filter for arp traffic: arp. This allows inspection of ARP requests and replies to identify suspicious activity.</li>
+                  <li>Investigate the ARP requests from captured from different hosts using the filter: arp.op == 1.</li>
+                  <li>Investigate ARP response packets: arp.oppcode == 2.</li>
+                  <li>Filter for gratuitous reply packets using: arp.isgratuitous</li>
+                  <li>Examine the ARP trffic associated with the gateway using: arp && arp.src.proto_ipv4 == gateway_ip_address && eth.src == gateway_mac_address</li>
+                  <li>Narrow down on the gateway IP to further investigate about MAC addresses associated with that IP using: arp.opcode == 2 && arp.src.proto_ipv4 == gateway_ip</li>
+                  <li>The output shows the ip pointing to a suspicious mac address. Frequency of ARP replies indicate ARP Spoofing. Confirm by using this filter: arp.opcode ==2 && _ws.col.info contains "gateway_ip is at" </li>
+                  <li>Narrow down on the attacker's mac address that has associated itself with the gateway's ip address using: arp.opcode == 2 && arp.src.proto_ipv4 == 192.168.10.1 && eth.src == attaker's_mac_address</li>
+                  <li>Check for duplicate ip-to-mac mappings using this filter: arp.duplicate-address-detected || arp.duplicate-address-frame</li>                                    
+                 </ol>              
+              <!-- <dd class="placeholder">[Walk through what you checked, in order]</dd> -->
+              <dt>Findings</dt>
+                <ol>
+                  <li>A suspicious mac address was found sharing the same IP as the gateway.</li>
+                </ol>              
+              <!-- <dd class="placeholder">[Spoofed sender? Failed auth checks? Malicious URL verdict?]</dd> -->
+              <dt>Recommendation</dt>
+                <ol>
+                  <li>Find the suspicious device.</li>
+                  <li>Isolate the identified device by shutting down the port, moving it to a quarantine vlan, or blocking the MAC address with port-security or Acccess Control List rule.</li>
+                  <li>Verify the attacker's identity by checking whether the MAC address belongs to a rogue device, compromised host, or someone legitimately on network.</li>             
+                </ol>
+              <!-- <dd class="placeholder">[Verdict — e.g. block sender domain, quarantine, user notification]</dd> -->
+            </dl>
+          </div>
+        </details>
+        <details class="case">
+          <summary>
+            <span class="id mono">CASE-007</span>
             <span class="title">PCAP review — identifying beaconing traffic</span>
             <span class="tag tag--priority">write-up in progress</span>
             <span class="chev">▸</span>
@@ -689,7 +732,7 @@
         </details>
         <details class="case" open>
           <summary>
-            <span class="id mono">CASE-007</span>
+            <span class="id mono">CASE-008</span>
             <span class="title">TryHackMe lab — detecting simulated brute-force logins</span>
             <span class="tag tag--priority">write-up in progress</span>
             <!-- <span class="tag tag--verified">verified</span> -->
@@ -727,7 +770,7 @@
             <span class="name">SAL1 — Security Analyst Level 1</span>
             <span class="pct mono">in progress</span>
           </div>
-          <div class="bar"><span style="width:47%"></span></div>
+          <div class="bar"><span style="width:49%"></span></div>
           <!-- <p class="train-note">Update this percentage as you move through the path.</p> -->
         </div>
 
@@ -749,7 +792,7 @@
         </div>
       </section>
 
-      <section id="artifacts">
+      <!-- <section id="artifacts">
         <div class="section-head">
           <h2>Detection artifacts</h2>
           <span class="count">rules &amp; queries</span>
@@ -790,7 +833,7 @@ level: medium</pre>
       </section>
 
     </main>
-  </div>
+  </div> -->
 
   <footer id="contact">
     <span>Simon Ayodi — simonayodi@gmail.com — last updated September 2026</span>
